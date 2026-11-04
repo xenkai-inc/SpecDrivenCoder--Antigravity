@@ -19,13 +19,21 @@
   ```bash
   clasp create --type webapp --title "<アプリ名>"
   ```
-  > 注意：このコマンドは `appsscript.json` を上書きすることがある。実行前に中身を控えておき、実行後に `timeZone`（`Asia/Tokyo`）と `webapp` の設定が元のままか確かめ、変わっていたら戻す
+  > 注意：このコマンドは `appsscript.json` を上書きする（clasp 3.4.1 で確認。`timeZone` が `America/New_York` になり、`webapp` の設定が消える）。実行前に控えを取り、実行後に戻す：
+  > ```bash
+  > cp appsscript.json appsscript.json.bak
+  > clasp create --type webapp --title "<アプリ名>"
+  > mv appsscript.json.bak appsscript.json
+  > ```
 
 ### 2. 保存（push）
 
 ```bash
-clasp push
+clasp push --force
 ```
+
+- **`--force` は必ず付ける**。`appsscript.json` が Google 側と違うとき、付けないと「Skipping push.」と出て **何も送られない**（対話なしで実行すると、上書きしてよいかの確認が「いいえ」扱いになるため。clasp 3.4.1 で確認）。PC 側が正本なので、常に付けてよい
+- 結果に「Pushed N files」と出て、`appsscript.json`・`.gs`・`.html` が並んでいることを確かめる。並んでいなければ送れていない
 
 利用者には一言添える：
 
