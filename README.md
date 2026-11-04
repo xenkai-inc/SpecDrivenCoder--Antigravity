@@ -32,7 +32,7 @@ SpecDrivenCoder/
 ├── GEMINI.md         # Antigravity が自動で読み込むエージェント定義・ルール
 ├── .agents/          # Antigravity のカスタムディスカバリ規格
 │   └── skills/       # skills/ へのリンク
-├── skills/           # 開発フローの各ステップ
+├── skills/           # 開発フローの各ステップ（各フォルダに SKILL.md と GAS 用の gas.md）
 │   ├── spec/         # /spec — 仕様を書く・追記する
 │   ├── design/       # /design — UI のモダンなデザイン方針を決める
 │   ├── implement/    # /implement — 仕様に沿って実装する
@@ -40,13 +40,22 @@ SpecDrivenCoder/
 │   ├── review/       # /review — 仕様と実装のズレを検出する
 │   └── secure/       # /secure — 公開前の安全チェック
 └── templates/        # 仕様 / テストの雛形
-    ├── README.md      # 技術仕様入り README の雛形
+    ├── README.md      # 技術仕様入り README の雛形（Web アプリ）
     ├── spec/          # 仕様の雛形
     │   ├── index.md   # 仕様の目次
     │   ├── feature.md # 機能1個分の雛形
     │   └── design.md  # UI デザイン方針の雛形
-    └── example.test.ts
+    ├── example.test.ts
+    └── gas/           # GAS アプリ用の雛形
+        ├── README.md       # 技術仕様入り README（GAS 版）
+        ├── feature.md      # 機能1個分の雛形（AC に「確かめ方」の欄つき）
+        ├── gas-loader.js   # GAS のコードを PC でテストするための道具
+        ├── example.test.js # GAS アプリのテストの最小サンプル
+        ├── package.json    # テスト用の設定（Vitest のみ）
+        └── .claspignore    # Google に送るファイルの指定
 ```
+
+> **Web アプリと GAS アプリの両方に対応** しています。対象プロジェクトに `appsscript.json` などがあれば、エージェントが GAS アプリと判定し、各スキルの `gas.md` と `templates/gas/` を使います（判定の決まりは `GEMINI.md`「アプリの種類」）。
 
 > 仕様の置き場所は、対象プロジェクト側で **README.md（技術仕様）** と **`spec/` ディレクトリ（機能ごとの仕様）** に分かれます。詳しくは下記「動作の流れ」を参照。
 
@@ -166,6 +175,8 @@ git clone <このリポジトリのURL> ~/develop/SpecDrivenCoder--Antigravity
 | [templates/spec/index.md](templates/spec/index.md) | `spec/` の目次（機能一覧）の雛形 |
 | [templates/spec/feature.md](templates/spec/feature.md) | 機能1個分の仕様の雛形 + 記入サンプル |
 | [templates/example.test.ts](templates/example.test.ts) | Vitest の最小サンプル |
+| `skills/<name>/gas.md` | GAS アプリのときに SKILL.md へ足す・読み替えるルール（食い違う箇所は gas.md を優先） |
+| [templates/gas/](templates/gas/) | GAS アプリ用の雛形（README・機能仕様・テストの道具・テスト例・package.json・.claspignore） |
 
 ---
 
@@ -173,6 +184,12 @@ git clone <このリポジトリのURL> ~/develop/SpecDrivenCoder--Antigravity
 
 ### Q. 既存のアプリにこのエージェントを使えますか？
 A. 使えます。README も `spec/` もなくて問題ありません。エージェントが現状把握をしてから、まず README（技術仕様）を用意し、**今回触る範囲だけ** 最小の機能仕様を `spec/` に書いて進めます。既存コード全部の仕様化やテスト化は求めません。
+
+### Q. Google Apps Script（GAS）のアプリにも使えますか？
+A. 使えます。対象プロジェクトに `appsscript.json` があれば、エージェントが GAS アプリとして進めます。流れは同じ（spec → test → implement → review）で、次の点が GAS 向けになります。
+- 判定・計算などの部分は、アプリのコードを書き換えずに PC の中で自動テストします（テスト一式は Google には送りません）
+- 画面・スプレッドシートへの保存・AI の返答は、保存（push）したあと確認用 URL を開いて、仕様の受け入れ基準どおりかを一緒に確かめます
+- API キーはスクリプトプロパティに入れ、公開前のチェックでは公開範囲と実行ユーザーの組み合わせを点検します
 
 ### Q. 対象プロジェクトと SpecDrivenCoder は同じディレクトリに置く必要がありますか？
 A. 不要です。SpecDrivenCoder は `~/develop/SpecDrivenCoder--Antigravity/` で起動し、対象プロジェクトのパス（例：`~/develop/MyApp`）を依頼の中で指定します。
